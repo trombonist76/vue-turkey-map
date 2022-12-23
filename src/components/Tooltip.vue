@@ -8,11 +8,11 @@ const props = defineProps({
   left: Number,
   tooltipBgColor: {
     type: String,
-    default: "#666"
+    default: "#0f172a"
   },
   tooltipTextColor: {
     type: String,
-    default: "#000"
+    default: "#fff"
   }
 });
 
@@ -28,7 +28,6 @@ const position = computed(() => ({top: `${props.top}px`, left: `${props.left}px`
 
 <style scoped>
 .tooltip {
-  width: 120px;
   background-color: v-bind('props.tooltipBgColor');
   color: v-bind('props.tooltipTextColor');
   position: absolute;
@@ -36,8 +35,8 @@ const position = computed(() => ({top: `${props.top}px`, left: `${props.left}px`
   top: v-bind('position.top');
   left: v-bind('position.left');
   text-align: center;
-  padding: .7rem .4rem;
-  font-weight: 600;
+  padding: .7rem .5rem;
+  font-weight: 500;
   border-radius: 7px;
   pointer-events: none;
 }

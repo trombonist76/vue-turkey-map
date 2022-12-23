@@ -6,7 +6,7 @@ import { ref, reactive } from "vue"
 const props = defineProps({
   cities: {
     type: Array,
-    default: data.cities,
+    default: data,
   },
 
   viewBox: {
