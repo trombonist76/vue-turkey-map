@@ -7,3 +7,8 @@
   outline: none;
   box-sizing: border-box;
 }
+
+body{
+  background-color: #1e2135;
+  color: white;
+}

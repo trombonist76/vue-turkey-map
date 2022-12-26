@@ -2,7 +2,9 @@
 import data from "@/assets/data/cities.json";
 import City from "@/components/City.vue";
 import Tooltip from "@/components/Tooltip.vue";
-import { ref, reactive } from "vue"
+import { ref, reactive, computed, watch } from "vue"
+import { isInArrayById, prepareToEmit } from "@/utils"
+
 const props = defineProps({
   cities: {
     type: Array,
@@ -17,16 +19,6 @@ const props = defineProps({
   hoverable: {
     type: Boolean,
     default: true
-  },
-
-  defaultColor: {
-    type: String,
-    default: "#dddddd"
-  },
-
-  hoverHexColor: {
-    type: String,
-    default: "#aaa"
   },
 
   opacity: {
@@ -45,13 +37,28 @@ const props = defineProps({
       top: -26,
       left: 16
     }
-  }
+  },
+
+  clickToSelect: {
+    type: Boolean,
+    default: true
+  },
+
+  defaultSelecteds: {
+    type: Function,
+    default: ( city ) => false
+  },
+
+	defaultColor: String,
+	hoverHexColor: String,
+	selectedColor: String,
 });
 
 const emits = defineEmits(["hover", "select"])
 const { top, left, width, height } = props.viewBox;
 const textViewBox = `${top} ${left} ${width} ${height}`;
-const selectedCity = ref(null)
+const selectedCitiesByProps = computed(() => data.filter(city => props.defaultSelecteds(city)))
+const selectedCities = ref(selectedCitiesByProps.value)
 const tooltipSettings = reactive({
   text: "",
   top: 0,
@@ -59,16 +66,33 @@ const tooltipSettings = reactive({
   isVisible: false
 })
 
-const selectedCityHandler = (city) => {
-  if(selectedCity.value?.id === city.id) return
-  selectedCity.value = city
-  emits("select", city)
+console.log('props.selectedColor :>> ', props.selectedColor);
+const checkInSelecteds = (city) => {
+  const result = isInArrayById(selectedCities.value, city.id)
+  return result
+}
+
+watch(() => selectedCitiesByProps.value, 
+  () => selectedCities.value = selectedCitiesByProps.value
+)
+
+const clickedCityHandler = (city) => {
+  const isInArray = checkInSelecteds(city)
+  if(isInArray) return
+
+  if(!props.clickToSelect) return
+  selectedCities.value.push(city)
+
+  const justSelected = prepareToEmit(city)
+  const allSelecteds = prepareToEmit(selectedCities.value)
+  emits("select", justSelected, allSelecteds)
 }
 
 const enterMouseHandler = (city) => {
   tooltipSettings.isVisible = true
   tooltipSettings.text = props.tooltipContent(city)
-  emits("hover", city)
+  const hoveredCity = prepareToEmit(city)
+  emits("hover", hoveredCity)
 }
 
 const leaveMouseHandler = () => {
@@ -89,18 +113,20 @@ const moveMouseHandler = (event) => {
     xmlnsXlink="http://www.w3.org/1999/xlink"
     xmlSpace="preserve"
     :viewBox="textViewBox"
-    style="{ width: '100%', height: 'auto' }"
+    style="{ width: '100%', height: 'auto'}"
   >
     <g key="turkey" id="turkey">
       <City 
-        v-for="city in props.cities" 
-        :key="city.id" 
+        v-for="city in props.cities"
+        :isActive="checkInSelecteds(city)"
+        :key="city" 
         :city="city"
         :hoverable="props.hoverable"
         :hoverHexColor="props.hoverHexColor"
         :defaultColor="props.defaultColor"
+				:selectedColor="props.selectedColor"
         :opacity="props.opacity"
-        @select="selectedCityHandler"
+        @select="clickedCityHandler"
         @enterMouse="enterMouseHandler"
         @moveMouse="moveMouseHandler"
         @leaveMouse="leaveMouseHandler">
