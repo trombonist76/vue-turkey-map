@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from "vue"
+import { ref } from "vue"
 
 const props = defineProps({
   city: {
@@ -19,37 +19,31 @@ const props = defineProps({
 
   defaultColor: {
     type: String,
-    default: "#dddddd"
+    default: "#fff"
   },
 
   hoverHexColor: {
     type: String,
     default: "#aaa"
-  }
+  },
+
+	selectedColor: {
+		type: String,
+		default: "#7a7a7a"
+	},
+
+  isActive: Boolean
 
 })
 
 const emits = defineEmits(["enterMouse", "leaveMouse", "moveMouse", "select"])
-const cityEmitFields = () => {
-  const fieldsObj = {
-    id: props.city.id,
-    plateNumber: props.city.plateNumber,
-    name: props.city.name
-  }
-  return fieldsObj
-}
-
 const cityRef = ref(null)
-const hoverColor = computed(() => props.hoverable && props.hoverHexColor)
 
-const mouseEnterHandler = (event) => {
-  const emitingFields = cityEmitFields()
-  cityRef.value.style.fill = hoverColor.value
-  emits("enterMouse", emitingFields)
+const mouseEnterHandler = () => {
+  emits("enterMouse", props.city)
 }
 
 const mouseLeaveHandler = () => {
-  cityRef.value.style.fill = props.defaultColor
   emits("leaveMouse")
 }
 
@@ -58,25 +52,37 @@ const mouseMoveHandler = (event) => {
 }
 
 const clickHandler = () => {
-  const emitingFields = cityEmitFields()
-  emits("select", emitingFields)
+  emits("select", props.city)
 }
 </script>
 
 <template>
   <g 
-    @mouseenter="mouseEnterHandler"
-    @mouseleave="mouseLeaveHandler"
-    @mouseover="mouseOverHandler"
+    @mouseenter="mouseEnterHandler" 
+    @mouseleave="mouseLeaveHandler" 
     @mousemove="mouseMoveHandler"
-    @click="clickHandler"
-    >
-      <path ref="cityRef" class="city" :fill="props.defaultColor" :fill-opacity="props.opacity" :d="city.path" />
+    @click="clickHandler">
+    <path 
+      ref="cityRef" 
+      class="city" 
+      :id="props.city.id" 
+      :class="{ 'active': props.isActive }" 
+      :fill-opacity="props.opacity"
+      :d="city.path" />
   </g>
 </template>
 
 <style lang="scss" scoped>
-.city{
+.city {
   cursor: pointer;
+  fill: v-bind('props.defaultColor');
+  transition: fill 150ms ease-out;  
+
+  &:hover {
+    fill: v-bind('props.hoverHexColor');
+  }
+}
+.active {
+  fill: v-bind('props.selectedColor')
 }
 </style>
