@@ -3,7 +3,7 @@ import data from "@/assets/data/cities.json"
 import TurkeyMap from "@/components/TurkeyMap.vue";
 import { onBeforeMount, ref } from "vue";
 import { randomNumber, randomColor } from "@/utils/random" 
-import { byPlateNumber, byPopulation, byRegion, groupBy } from "@/utils/filters" 
+import { byPlateNumber, byPopulation, byRegion, groupBy, createPopulationHeatmap } from "@/utils/filters" 
 
 const filters = [ 
 	( city ) => byPlateNumber(city, plateNumberFilter.value), 
@@ -17,11 +17,11 @@ const populationFilter = ref(null)
 const activeFilter = ref(null)
 let autoShufflerInterval = ref(undefined)
 
-const regions = groupBy(data, (city) => city.region)
-
 onBeforeMount(() => shuffleHandler())
 
+
 const shuffleHandler = () => {
+	const regions = groupBy(data, (city) => city.region)
 	activeFilter.value = filters.at(randomNumber(filters.length - 1))
 	regionFilter.value = regions.at(randomNumber(regions.length - 1))
 	plateNumberFilter.value = randomNumber(81, 1)
@@ -46,6 +46,11 @@ const selectCityHandler = (city, cities) => {
 	console.log('city :>> ', city);
 	console.log('cities :>> ', cities);
 }
+
+//this iterates cities and changes city's 'isActive' and 'color' by condition
+const selectCitiesHandler = (cities) => {	
+	return createPopulationHeatmap(cities)
+}
 </script>
 
 <template>
@@ -54,7 +59,8 @@ const selectCityHandler = (city, cities) => {
 		<button v-if="!autoShufflerInterval" class="buttons__button" @click="autoShuffler">Auto Shuffle</button>
 		<button v-else class="buttons__button" @click="autoShuffler">Stop Auto Shuffle</button>
 	</div>
-	<TurkeyMap :defaultSelecteds="selectedCityHandler" @select="selectCityHandler" :selectedColor="selectedColor"/>
+	<TurkeyMap :isSelectedCity="selectedCityHandler" @select="selectCityHandler" :selectedColor="selectedColor"/>
+	<TurkeyMap :selectCities="selectCitiesHandler" @select="selectCityHandler"/>
 </template>
 
 <style scoped lang="scss">
