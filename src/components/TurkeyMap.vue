@@ -2,13 +2,13 @@
 import data from "@/assets/data/cities.json";
 import City from "@/components/City.vue";
 import Tooltip from "@/components/Tooltip.vue";
-import { ref, reactive, computed, watch } from "vue"
-import { isInArrayById, prepareToEmit } from "@/utils"
+import { reactive, computed } from "vue"
+import { prepareToEmit } from "@/utils"
 
 const props = defineProps({
   cities: {
     type: Array,
-    default: data,
+    default: [],
   },
 
   viewBox: {
@@ -44,10 +44,19 @@ const props = defineProps({
     default: true
   },
 
-  defaultSelecteds: {
+	toggleUnselect: {
+		type: Boolean,
+		default: true,
+	},
+
+  isSelectedCity: {
     type: Function,
-    default: ( city ) => false
+    default: city => false
   },
+
+	selectCities: {
+		type: Function,
+	},
 
 	defaultColor: String,
 	hoverHexColor: String,
@@ -55,10 +64,19 @@ const props = defineProps({
 });
 
 const emits = defineEmits(["hover", "select"])
+
 const { top, left, width, height } = props.viewBox;
-const textViewBox = `${top} ${left} ${width} ${height}`;
-const selectedCitiesByProps = computed(() => data.filter(city => props.defaultSelecteds(city)))
-const selectedCities = ref(selectedCitiesByProps.value)
+const textViewBox = `${top} ${left} ${width} ${height}`
+
+const citiesByProps = computed(() => props.selectCities && props.selectCities(data))
+const citiesWithDefaultSelecteds = computed(() => data.map(city => ({...city, isSelected: props.isSelectedCity(city)})))
+const usedCitiesArray = computed(() => {
+	return  citiesByProps.value?.length === data.length
+		? citiesByProps.value 
+		: citiesWithDefaultSelecteds.value 
+})
+
+const selectedCities = computed(() => usedCitiesArray.value.filter(city => city.isSelected))
 const tooltipSettings = reactive({
   text: "",
   top: 0,
@@ -66,25 +84,20 @@ const tooltipSettings = reactive({
   isVisible: false
 })
 
-console.log('props.selectedColor :>> ', props.selectedColor);
-const checkInSelecteds = (city) => {
-  const result = isInArrayById(selectedCities.value, city.id)
-  return result
-}
-
-watch(() => selectedCitiesByProps.value, 
-  () => selectedCities.value = selectedCitiesByProps.value
-)
-
 const clickedCityHandler = (city) => {
-  const isInArray = checkInSelecteds(city)
-  if(isInArray) return
+  const isInArray = city.isSelected
+	
+	const justSelected = prepareToEmit(city)
+  const allSelecteds = prepareToEmit(selectedCities.value)
+
+  if(isInArray && props.toggleUnselect){
+		city.isSelected = false
+		emits("select", justSelected, allSelecteds)
+		return
+	}
 
   if(!props.clickToSelect) return
-  selectedCities.value.push(city)
-
-  const justSelected = prepareToEmit(city)
-  const allSelecteds = prepareToEmit(selectedCities.value)
+  city.isSelected = true
   emits("select", justSelected, allSelecteds)
 }
 
@@ -113,24 +126,24 @@ const moveMouseHandler = (event) => {
     xmlnsXlink="http://www.w3.org/1999/xlink"
     xmlSpace="preserve"
     :viewBox="textViewBox"
-    style="{ width: '100%', height: 'auto'}"
+    style="{{ width: '100%', height: 'auto'}}"
   >
     <g key="turkey" id="turkey">
-      <City 
-        v-for="city in props.cities"
-        :isActive="checkInSelecteds(city)"
-        :key="city" 
-        :city="city"
-        :hoverable="props.hoverable"
-        :hoverHexColor="props.hoverHexColor"
-        :defaultColor="props.defaultColor"
-				:selectedColor="props.selectedColor"
-        :opacity="props.opacity"
-        @select="clickedCityHandler"
-        @enterMouse="enterMouseHandler"
-        @moveMouse="moveMouseHandler"
-        @leaveMouse="leaveMouseHandler">
-      </City>
+				<City 
+					v-for="city in usedCitiesArray"
+					:isActive="city.isSelected"
+					:key="city" 
+					:city="city"
+					:hoverable="props.hoverable"
+					:hoverHexColor="props.hoverHexColor"
+					:defaultColor="props.defaultColor"
+					:selectedColor="city.color || props.selectedColor"
+					:opacity="props.opacity"
+					@select="clickedCityHandler"
+					@enterMouse="enterMouseHandler"
+					@moveMouse="moveMouseHandler"
+					@leaveMouse="leaveMouseHandler">
+				</City>
     </g>
   </svg>
   <Tooltip v-bind="tooltipSettings"/>
