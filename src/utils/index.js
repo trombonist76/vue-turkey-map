@@ -1,6 +1,6 @@
 import { toRaw } from "vue"
 
-export function isInArrayById(array, id){
+export function isInArrayById (array, id) {
     const isInArray = array.some(item => item.id === id)
     return isInArray
 }
