@@ -6,11 +6,6 @@ import { reactive, computed } from "vue"
 import { prepareToEmit } from "@/utils"
 
 const props = defineProps({
-  cities: {
-    type: Array,
-    default: [],
-  },
-
   viewBox: {
     type: Object,
     default: { top: 0, left: 80, width: 1050, height: 585 },
@@ -146,5 +141,9 @@ const moveMouseHandler = (event) => {
 				</City>
     </g>
   </svg>
-  <Tooltip v-bind="tooltipSettings"/>
+  <Tooltip v-bind="tooltipSettings">
+		<template #tooltip="{ text }">
+			<slot :text="text"></slot>
+		</template>
+	</Tooltip>
 </template>

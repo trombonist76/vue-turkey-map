@@ -21,7 +21,11 @@ const position = computed(() => ({top: `${props.top}px`, left: `${props.left}px`
 
 <template>
   <Transition name="fade">
-    <div v-show="props.isVisible" class="tooltip">{{ props.text }}</div>
+			<div v-show="props.isVisible" class="tooltip">
+				<slot name="tooltip" :text="props.text">
+					{{ props.text }}
+				</slot>
+			</div>
   </Transition>
 </template>
 

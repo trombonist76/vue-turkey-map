@@ -60,7 +60,11 @@ const selectCitiesHandler = (cities) => {
 		<button v-else class="buttons__button" @click="autoShuffler">Stop Auto Shuffle</button>
 	</div>
 	<TurkeyMap :isSelectedCity="selectedCityHandler" @select="selectCityHandler" :selectedColor="selectedColor"/>
-	<TurkeyMap :selectCities="selectCitiesHandler" @select="selectCityHandler"/>
+	<TurkeyMap :selectCities="selectCitiesHandler" @select="selectCityHandler">
+		<template v-slot="{ text }">
+			<span>City: {{ text }}</span>
+		</template>
+	</TurkeyMap>
 </template>
 
 <style scoped lang="scss">
