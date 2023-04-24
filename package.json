@@ -1,7 +1,19 @@
 {
   "name": "vue-turkey-map",
-  "version": "0.0.0",
-  "private": true,
+  "type": "module",
+  "version": "0.0.11",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/turkey-map.umd.cjs",
+  "module": "./dist/turkey-map.js",
+  "exports": {
+    ".": {
+      "import": "./dist/turkey-map.js",
+      "require": "./dist/turkey-map.umd.cjs"
+    },
+    "./dist/style.css": "./dist/style.css"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
