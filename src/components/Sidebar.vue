@@ -68,7 +68,6 @@ const plateNumHandler = (number) => {
 
 <template>
   <Sidebar v-model:visible="props.visible" class="sidebar">
-    <pre> {{ selectedRegions }}</pre>
     <div class="content">
       <Fieldset legend="Bölge Seçimi">
         <div class="regions">

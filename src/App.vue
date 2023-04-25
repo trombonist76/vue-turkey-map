@@ -68,7 +68,6 @@ const plateNumberHandler = (plateNumber) => {
 }
 
 const regionHander = (region) => {
-	console.log('region', region)
 	activeFilter.value = (city) => byRegion(city, region)
 }
 </script>
