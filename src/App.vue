@@ -64,11 +64,11 @@ const populationHandler = (population) => {
 }
 
 const plateNumberHandler = (plateNumber) => {
-	console.log('typeof plateNumber', typeof plateNumber)
 	activeFilter.value = (city) => byPlateNumber(city, plateNumber)
 }
 
 const regionHander = (region) => {
+	console.log('region', region)
 	activeFilter.value = (city) => byRegion(city, region)
 }
 </script>
@@ -78,7 +78,7 @@ const regionHander = (region) => {
     <Sidebar
       @setPopulation="populationHandler"
       @setPlateNum="plateNumberHandler"
-      @setRegionHandler="regionHander"
+      @setRegion="regionHander"
     />
     <div class="content">
       <div class="buttons">

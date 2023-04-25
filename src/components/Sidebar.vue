@@ -50,7 +50,7 @@ const population = ref(0);
 const formatter = Intl.NumberFormat("tr", { notation: "compact" });
 const formattedPopulation = computed(() => formatter.format(population.value));
 
-const regionHander = (region) => {
+const regionHandler = (region) => {
   selectedRegions.value = region;
   emits("setRegion", region);
 };
@@ -68,6 +68,7 @@ const plateNumHandler = (number) => {
 
 <template>
   <Sidebar v-model:visible="props.visible" class="sidebar">
+    <pre> {{ selectedRegions }}</pre>
     <div class="content">
       <Fieldset legend="Bölge Seçimi">
         <div class="regions">
@@ -81,7 +82,7 @@ const plateNumHandler = (number) => {
               :inputId="region.name"
               :value="region.name"
               name="region"
-              @update:modelValue="regionHander"
+              @update:modelValue="regionHandler"
             />
             <label :for="region.name">{{ region.name }}</label>
           </div>
