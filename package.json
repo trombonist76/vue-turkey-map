@@ -20,6 +20,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "primevue": "^3.27.0",
     "vue": "^3.2.45"
   },
   "devDependencies": {
