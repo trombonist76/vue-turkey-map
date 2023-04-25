@@ -1,6 +1,10 @@
 import { randomColor } from "./random"
 
 export function byRegion(city, region){
+	if (Array.isArray(region)) {
+		const result = region.includes(city.region)
+		return result 
+	}
 	const result = city.region === region
 	return result
 }
