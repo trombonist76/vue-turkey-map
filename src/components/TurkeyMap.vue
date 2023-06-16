@@ -58,7 +58,7 @@ const props = defineProps({
 	selectedColor: String,
 });
 
-const emits = defineEmits(["hover", "select"])
+const emits = defineEmits(["hover", "select", 'deselect'])
 
 const { top, left, width, height } = props.viewBox;
 const textViewBox = `${top} ${left} ${width} ${height}`
@@ -87,7 +87,7 @@ const clickedCityHandler = (city) => {
 
   if(isInArray && props.toggleUnselect){
 		city.isSelected = false
-		emits("select", justSelected, allSelecteds)
+		emits("deselect", justSelected, allSelecteds)
 		return
 	}
 
