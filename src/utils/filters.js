@@ -1,4 +1,5 @@
-import { randomColor } from "./random"
+import data from "@/assets/data/cities.json";
+import { randomNumber } from "@/utils/random";
 
 export function byRegion(city, region){
 	if (Array.isArray(region)) {
@@ -24,7 +25,7 @@ export function byPlateNumber(city, plateNumber){
 	return result
 }
 
-export function groupBy( data, getValue ){
+export function groupBy(data, getValue){
 	const groupedData = data.reduce((prev, curr) => {
 		const value = getValue(curr)
 		const isInPrev = prev.includes(value)
@@ -76,7 +77,7 @@ const populationLimits = [
 ]
 
 export function createPopulationHeatmap(data){
-	const sorted = populationLimits.sort((a, b) => b.limit - a.limit)
+	const sorted = [...populationLimits].sort((a, b) => b.limit - a.limit)
 	const heatmap = data.map((city) => {
 		const limit = sorted.find(population => population.limit < city.population)
 		const result = {
@@ -88,4 +89,19 @@ export function createPopulationHeatmap(data){
 	})
 
 	return heatmap
+}
+
+export const getRandomFilterByKey = (key) => {
+	const randomValuesByFilter = {
+		plateNumber: randomNumber(81, 1),
+		population: randomNumber(3e6, 1e5),
+	}
+
+	if (key === 'region') {
+		const regions = groupBy(data, (city) => city.region);
+		const randomIndex = randomNumber(regions.length - 1)
+		randomValuesByFilter[key] = regions.at(randomIndex)
+	}
+
+	return randomValuesByFilter[key]
 }

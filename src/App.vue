@@ -1,37 +1,47 @@
 <script setup>
-import data from "@/assets/data/cities.json";
 import TurkeyMap from "@/components/TurkeyMap.vue";
 import Sidebar from "@/components/Sidebar.vue";
-import { onBeforeMount, ref } from "vue";
+import Button from "primevue/Button";
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
+import { onBeforeMount, reactive, ref } from "vue";
 import { randomNumber, randomColor } from "@/utils/random";
 import {
   byPlateNumber,
   byPopulation,
   byRegion,
-  groupBy,
   createPopulationHeatmap,
+  getRandomFilterByKey,
 } from "@/utils/filters";
 
-const filters = [
-  (city) => byPlateNumber(city, plateNumberFilter.value),
-  (city) => byRegion(city, regionFilter.value),
-  (city) => byPopulation(city, populationFilter.value),
-];
-const selectedColor = ref(null);
-const regionFilter = ref(null);
-const plateNumberFilter = ref(null);
-const populationFilter = ref(null);
-const activeFilter = ref(null);
-const autoShufflerInterval = ref(undefined);
+const initialState = {
+  region: null,
+  population: null,
+  plateNumber: null,
+};
 
-onBeforeMount(() => shuffleHandler());
+const toast = useToast();
+
+const selectedColor = ref(null);
+const autoShufflerInterval = ref(undefined);
+const isSidebarVisible = ref(true);
+const activeFilters = reactive({ ...initialState });
+
+//Actions
+const filterActions = {
+  region: (city) => byRegion(city, activeFilters.region),
+  population: (city) => byPopulation(city, activeFilters.population),
+  plateNumber: (city) => byPlateNumber(city, activeFilters.plateNumber),
+};
 
 const shuffleHandler = () => {
-  const regions = groupBy(data, (city) => city.region);
-  activeFilter.value = filters.at(randomNumber(filters.length - 1));
-  regionFilter.value = regions.at(randomNumber(regions.length - 1));
-  plateNumberFilter.value = randomNumber(81, 1);
-  populationFilter.value = randomNumber(3e6, 1e5);
+  const keys = Object.keys(activeFilters);
+  const randFilterIndex = randomNumber(keys.length - 1);
+  const randomKey = keys.at(randFilterIndex);
+  const filterValue = getRandomFilterByKey(randomKey);
+
+  const state = { ...initialState, [randomKey]: filterValue };
+  Object.assign(activeFilters, state);
   selectedColor.value = randomColor();
 };
 
@@ -45,12 +55,21 @@ const autoShuffler = () => {
 };
 
 const selectedCityHandler = (city) => {
-  return activeFilter.value(city);
+  const isPassedCondition = Object.entries(activeFilters).some(
+    ([key, value]) => {
+      if (!value) return false;
+      const action = filterActions[key];
+      return action(city);
+    }
+  );
+
+  return isPassedCondition;
 };
 
 const selectCityHandler = (city, cities) => {
-  console.log("city :>> ", city);
-  console.log("cities :>> ", cities);
+  const title = 'Şehir seçimi başarılı'
+  const message = `${city.name} şehrini seçtiniz`
+  toast.add({ severity: 'success', summary: title, detail: message, life: 2000 });
 };
 
 //this iterates cities and changes city's 'isActive' and 'color' by condition
@@ -58,41 +77,44 @@ const selectCitiesHandler = (cities) => {
   return createPopulationHeatmap(cities);
 };
 
-
 const populationHandler = (population) => {
-	activeFilter.value = (city) => byPopulation(city, population)
-}
+  activeFilters.population = population;
+};
 
 const plateNumberHandler = (plateNumber) => {
-	activeFilter.value = (city) => byPlateNumber(city, plateNumber)
-}
+  activeFilters.plateNumber = plateNumber;
+};
 
 const regionHander = (region) => {
-	activeFilter.value = (city) => byRegion(city, region)
+  activeFilters.region = region;
+};
+
+const showSidebar = () => {
+  isSidebarVisible.value = true
 }
+
+
+//Hooks
+onBeforeMount(() => shuffleHandler());
 </script>
 
 <template>
   <main class="wrapper">
-    <Sidebar
-      @setPopulation="populationHandler"
-      @setPlateNum="plateNumberHandler"
-      @setRegion="regionHander"
-    />
+    <Toast />
+    <div class="left-panel">
+      <Sidebar
+        @setPopulation="populationHandler"
+        @setPlateNum="plateNumberHandler"
+        @setRegion="regionHander"
+        @toggleAutoFilter="autoShuffler"
+        @shuffleOnce="shuffleHandler"
+        v-model:visible="isSidebarVisible"
+        :autoFilter="!!autoShufflerInterval"
+      />
+      <Button @click="showSidebar" class="open-sidebar" icon="pi-check"/>
+    </div>
+
     <div class="content">
-      <div class="buttons">
-        <button class="buttons__button" @click="shuffleHandler">Shuffle</button>
-        <button
-          v-if="!autoShufflerInterval"
-          class="buttons__button"
-          @click="autoShuffler"
-        >
-          Auto Shuffle
-        </button>
-        <button v-else class="buttons__button" @click="autoShuffler">
-          Stop Auto Shuffle
-        </button>
-      </div>
       <TurkeyMap
         :isSelectedCity="selectedCityHandler"
         @select="selectCityHandler"
@@ -139,5 +161,10 @@ const regionHander = (region) => {
       background-color: #818cf8;
     }
   }
+}
+.open-sidebar {
+  position: fixed;
+  bottom: 130px;
+  left: 20px;
 }
 </style>
