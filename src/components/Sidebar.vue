@@ -4,15 +4,28 @@ import Fieldset from "primevue/fieldset";
 import InputNumber from "primevue/inputnumber";
 import Checkbox from "primevue/Checkbox";
 import Slider from "primevue/Slider";
+import Button from "primevue/Button";
 import { computed, ref } from "vue";
+
 const props = defineProps({
   visible: {
     type: Boolean,
     default: true,
   },
+  autoFilter: {
+    type: Boolean,
+    default: true,
+  },
 });
 
-const emits = defineEmits(["setPopulation", "setPlateNum", "setRegion"]);
+const emits = defineEmits([
+  "setPopulation",
+  "setPlateNum",
+  "setRegion",
+  "update:visible",
+  "update:autoFilter",
+  "shuffleOnce"
+]);
 
 const regions = ref([
   {
@@ -64,10 +77,26 @@ const plateNumHandler = (number) => {
   plateNumber.value = number;
   emits("setPlateNum", number);
 };
+
+const visibleHandler = (isVisible) => {
+  emits("update:visible", isVisible);
+};
+
+const autoFilterHandler = () => {
+  emits("toggleAutoFilter", !props.autoFilter);
+};
+
+const shuffleOnce = () => {
+  emits("shuffleOnce")
+}
 </script>
 
 <template>
-  <Sidebar v-model:visible="props.visible" class="sidebar">
+  <Sidebar
+    :visible="props.visible"
+    @update:visible="visibleHandler"
+    class="sidebar"
+  >
     <div class="content">
       <Fieldset legend="Bölge Seçimi">
         <div class="regions">
@@ -106,12 +135,17 @@ const plateNumHandler = (number) => {
         <div class="population">
           <Slider
             :modelValue="population"
-            :min="2e5"
             @update:modelValue="populationHandler"
             :max="16e6"
           />
         </div>
       </Fieldset>
+      <div class="shufflers">
+        <Button v-if="!props.autoFilter" @click="autoFilterHandler" label="Otomatik Filtreyi Aç" outlined/>
+        <Button v-else @click="autoFilterHandler" label="Otomatik Filtreyi Kapat" outlined severity="secondary"/>
+        <Button v-if="!props.autoFilter" @click="shuffleOnce" label="Seçilenleri Karıştır" outlined severity="secondary"/>
+      </div>
+
     </div>
   </Sidebar>
 </template>
@@ -137,5 +171,11 @@ const plateNumHandler = (number) => {
 
 .population {
   padding-inline: 10px;
+}
+
+.shufflers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 </style>
