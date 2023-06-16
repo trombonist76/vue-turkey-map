@@ -1,7 +1,7 @@
 <script setup>
 import TurkeyMap from "@/components/TurkeyMap.vue";
 import Sidebar from "@/components/Sidebar.vue";
-import Button from "primevue/Button";
+import Button from "primevue/button";
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import { onBeforeMount, reactive, ref } from "vue";

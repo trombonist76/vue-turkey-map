@@ -2,9 +2,9 @@
 import Sidebar from "primevue/sidebar";
 import Fieldset from "primevue/fieldset";
 import InputNumber from "primevue/inputnumber";
-import Checkbox from "primevue/Checkbox";
-import Slider from "primevue/Slider";
-import Button from "primevue/Button";
+import Checkbox from "primevue/checkbox";
+import Slider from "primevue/slider";
+import Button from "primevue/button";
 import { computed, ref } from "vue";
 
 const props = defineProps({
